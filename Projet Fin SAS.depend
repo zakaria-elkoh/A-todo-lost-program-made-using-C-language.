@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1695307351 source:c:\users\youcode\desktop\projet fin sas\main.c
+	<stdio.h>
+	<stdlib.h>
+	"add.h"
+	"show.h"
+
+1695307548 c:\users\youcode\desktop\projet fin sas\add.h
+
+1695307548 c:\users\youcode\desktop\projet fin sas\show.h
+
