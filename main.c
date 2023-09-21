@@ -8,9 +8,8 @@ int tache_counter = 0;
 
 void menu() {
 
+
     int chois;
-
-
 
     puts("=======================================================================\n");
     puts("=                                 MENU                                =\n");
@@ -28,6 +27,8 @@ void menu() {
     printf("\n                           --> ");
     scanf("%d", &chois);
 
+
+
     switch(chois) {
         case 1:
             add(1);
@@ -41,14 +42,30 @@ void menu() {
         case 3:
             showTodos();
             break;
+
         case 4:
+            system("cls");
+            printf("\nQuelle tache tu veux modifier: \n--> ");
+            int target_tache;
+            scanf("%d", &target_tache);
+            printf("1. Modifier la description d'une tache.\n");
+            printf("2. Modifier le statut d’une tache.\n");
+            printf("3. Modifier le deadline d’une tache.\n--> ");
+            int r;
+            scanf("%d", &r);
+
+            update(r, target_tache);
+            break;
+
+        case 5:
             printf("edit\n");
             break;
-        case 5:
-            printf("search\n");
-            break;
+
         case 6:
-            printf("status\n");
+            printf("Rechercher une tache par son Identifiant.\n");
+            printf("\n");
+            int
+            search();
             break;
         case 7:
             printf("Statistiques\n");
@@ -80,7 +97,7 @@ typedef struct {
 
 } todos;
 
-    todos todo[100];
+todos todo[100];
 
 
 void add(int n) {
@@ -93,7 +110,7 @@ void add(int n) {
     for(int i=tache_counter; i<n; i++) {
         printf("\n");
         // id.
-        todo[i].id = tache_counter;
+        todo[i].id = tache_counter+1;
         // title.
         printf("entre le titre de tache %d: ", i+1);
         scanf(" %[^\n]", todo[i].title);
@@ -129,9 +146,10 @@ void showTodos() {
     for(int i=0; i<tache_counter; i++) {
         // title and description.
         printf("\n=================== TACHE %d =================== \n", todo[i].id+1);
+        printf("id: %d.\n", todo[i].id);
         printf("le titre: %s.\nle description: %s.\n", todo[i].title, todo[i].description);
         printf("deadline: %d/%d/%d.\n", todo[i].dead_line.day, todo[i].dead_line.month, todo[i].dead_line.year);
-        printf("statu: %s.", todo[i].status);
+        printf("statu: %s.\n", todo[i].status);
     }
     printf("\n======================================================================== \n", tache_counter);
 
@@ -139,27 +157,53 @@ void showTodos() {
 
 }
 
+void sort_by_alphabetical() {
 
+    for(int i=0; i<3; i++) {
+        printf("%d", todo[i].id);
+        printf("%s. \n", todo[i].title);
+    }
+
+}
+
+void update(int n, int tache) {
+
+    printf("the num is: %d, and the tache is %d.\n", n, tache);
+//    for(int i=0; i<tache_counter; i++) {
+//        if()
+//    }
+    switch(n) {
+        case 1:
+            printf("\n", n, tache);
+            scanf("%s", todo[tache].description);
+            menu();
+            break;
+//            todo[tache].description =
+        case 2:
+            printf("\n", n, tache);
+            scanf("%s", todo[tache].status);
+            menu();
+            break;
+//            todo[tache].status =
+        case 3:
+            printf("\n", n, tache);
+            scanf("%d", todo[tache].dead_line.year);
+            scanf("%d", todo[tache].dead_line.month);
+            scanf("%d", todo[tache].dead_line.day);
+            menu();
+            break;
+//            todo[tache].dead_line =
+    }
+
+}
+
+void search() {
+
+}
 int main()
 {
 
-//    todos todo[2];
-//
-//    todo[0].id = 1;
-//    todo[0].title = "to eat";
-//
-//    todo[1].id = 2;
-//    todo[1].title = "to play";
-//
-//
-//    for(int i=0; i<2; i++) {
-//        printf("id = %d\n", todo[i].id);
-//        printf("id = %s\n", todo[i].title);
-//    }
-
       menu();
-//      showTodos();
-
 
     return 0;
 }
