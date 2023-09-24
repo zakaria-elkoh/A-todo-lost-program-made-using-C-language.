@@ -14,6 +14,7 @@ typedef struct {
 
 typedef struct {
     int id;
+    int the_rest_days;
     char title[30];
     char description[100];
     char status[30];
@@ -66,7 +67,6 @@ void menu() {
 
         case 3:
             show_todos();
-//            sort_by_alphabetical();
             break;
 
         case 4:
@@ -102,20 +102,32 @@ void menu() {
 }
 
 
+int id_to_index(int target_tache_id) {
+
+    int target_tache_index;
+
+    for(int i=0; i<tache_counter; i++) {
+        if(todo[i].id == target_tache_id) {
+            target_tache_index = i;
+        }
+    }
+
+    return target_tache_index;
+}
 
 void add_todo(int n) {
 
 
-    n += tache_counter - delete_taches_counter;
+    n += tache_counter;
 
     // add user info to the todos.
-    for(int i=tache_counter - delete_taches_counter; i<n; i++) {
+    for(int i=tache_counter; i<n; i++) {
 
         int statu_chois;
 
         printf("\n");
         // id.
-        todo[i].id = tache_counter+1;
+        todo[i].id = tache_counter + 1 + delete_taches_counter;
         // title.
         printf("entre le titre de tache %d: ", i+1);
         scanf(" %[^\n]", todo[i].title);
@@ -128,10 +140,10 @@ void add_todo(int n) {
         printf("ending time of the tache %d: \n", i+1);
         printf("                            year: ");
         scanf("%d", &todo[i].dead_line.year);
-//        printf("                            month: "); to uncoment
-//        scanf("%d", &todo[i].dead_line.month);
-//        printf("                            day: "); to uncoment
-//        scanf("%d", &todo[i].dead_line.day);
+        printf("                            month: ");
+        scanf("%d", &todo[i].dead_line.month);
+        printf("                            day: ");
+        scanf("%d", &todo[i].dead_line.day);
 
         tache_counter++;
         undone_counter++;
@@ -165,18 +177,36 @@ void show_todos() {
     printf("1. Trier les taches par ordre alphabetique.\n");
     printf("2. Trier les taches par deadline.\n");
     printf("3. Afficher les taches dont le deadline est dans 3 jours ou moins.\n--> ");
+
     scanf("%d", &show_chois);
 
     switch(show_chois) {
         case 1:
             sort_by_alphabetical();
             break;
+
         case 2:
             sort_by_deadline();
             break;
+
         case 3:
-            printf("\n  sort by deadline less than 3 days coming soon.\n\n");
+            show_less_than3days();
             break;
+
+//        case 4:
+//
+//            printf("\n**************************** IL Y A (%d) TACHES **************************** \n", tache_counter);
+//            for(int i=0; i<tache_counter; i++) {
+//                // title and description.
+//                printf("\n----------------- TACHE %d ----------------- \n", i+1);
+//                printf("id: %d.\n", todo[i].id);
+//                printf("le titre: %s.\nle description: %s.\n", todo[i].title, todo[i].description);
+//                printf("deadline: %d/%d/%d.\n", todo[i].dead_line.day, todo[i].dead_line.month, todo[i].dead_line.year);
+//                printf("statu: %s.\n", todo[i].status);
+//            }
+//            printf("\n*************************************************************************** \n\n");
+//
+//            break;
     }
 
 
@@ -201,7 +231,7 @@ void sort_by_alphabetical() {
 
 //    printf("you wanna sort by alphabits.");
 
-    printf("\n**************************** IL Y A (%d) TACHES **************************** \n", tache_counter - delete_taches_counter);
+    printf("\n**************************** IL Y A (%d) TACHES **************************** \n", tache_counter);
 
     for(int i=0; i<tache_counter; i++) {
 
@@ -221,7 +251,7 @@ void sort_by_alphabetical() {
         printf("- statu: %s.\n", todo[i].status);
 
     }
-        printf("\n*************************************************************************** \n\n", tache_counter);
+        printf("\n*************************************************************************** \n\n");
 
     system("pause");
 
@@ -230,57 +260,98 @@ void sort_by_alphabetical() {
 
 }
 
-void sort_by_deadline() {
+void calculate_rest_days() {
 
+    // this return the current time.
     time_t current_time = time(NULL);
-    printf("%ld\n", current_time);
-
     struct tm date = *localtime(&current_time);
 
+    // current date.
     int current_year = date.tm_year + 1900;
     int current_month = date.tm_mon + 1;
     int current_day = date.tm_mday;
 
-    printf("\nyear: %d\n", current_year);
-    printf("month: %d\n", current_month);
-    printf("day: %d\n", current_day);
+    // calculate rest days for each todo.
+    for(int i=0; i<tache_counter; i++) {
+        todo[i].the_rest_days = (todo[i].dead_line.year - current_year) * 365 + (todo[i].dead_line.month - current_month) * 30 + (todo[i].dead_line.day - current_day);
+    }
 
+}
 
-//    for()
+void sort_by_deadline() {
 
-//    printf("hour: %d\n", date.tm_hour);
-//    printf("hour: %d\n", date.tm_min);
+    calculate_rest_days();
 
+    printf("\n**************************** IL Y A (%d) TACHES **************************** \n", tache_counter);
 
+    // sort the todos by the deadline.
+    for(int i=0; i<tache_counter; i++) {
+        for(int j=i+1; j<tache_counter; j++) {
+            if(todo[i].the_rest_days > todo[j].the_rest_days) {
+                todos swapTodo;
+                swapTodo = todo[j];
+                todo[j] = todo[i];
+                todo[i] = swapTodo;
+            }
+        }
+        printf("\n----------------- TACHE %d ----------------- \n", i+1);
+        printf("- id: %d.\n", todo[i].id);
+        printf("- le titre: %s.\n- le description: %s.\n", todo[i].title, todo[i].description);
+        printf("- deadline: %d/%d/%d.\n", todo[i].dead_line.day, todo[i].dead_line.month, todo[i].dead_line.year);
+        printf("- statu: %s.\n", todo[i].status);
+
+    }
+
+    printf("\n*************************************************************************** \n\n", tache_counter);
+
+    system("pause");
 
     menu();
 
 }
 
+void show_less_than3days() {
 
+    calculate_rest_days();
 
+    printf("\n********************* LES TACHES DONT LE DEADLINE EST DANS 3 JOURS OU MOINS ********************* \n");
+    for(int i=0; i<tache_counter; i++) {
+        if(todo[i].the_rest_days <= 3) {
+            printf("\n----------------- TACHE %d ----------------- \n", i+1);
+            printf("- id: %d.\n", todo[i].id);
+            printf("- le titre: %s.\n- le description: %s.\n", todo[i].title, todo[i].description);
+            printf("- deadline: %d/%d/%d.\n", todo[i].dead_line.day, todo[i].dead_line.month, todo[i].dead_line.year);
+            printf("- statu: %s.\n", todo[i].status);
+        }
+    }
+    printf("\n************************************************************************************************* \n\n");
 
+}
 
 void update_todo() {
 
     int current_statu;
 
     system("cls");
-    int target_tache, n;
 
-    printf("\nQuelle tache tu veux modifier: \n--> ");
-    scanf("%d", &target_tache);
+    int target_tache_id, target_tache_index, n;
+
+    printf("\nEntre identifiant de tache tu veux modifier: \n--> ");
+    scanf("%d", &target_tache_id);
+
+    printf("\nMODIFIER: \n");
     printf("1. Modifier la description d'une tache.\n");
     printf("2. Modifier le statut d'une tache.\n");
     printf("3. Modifier le deadline d'une tache.\n--> ");
     scanf("%d", &n);
 
+    target_tache_index = id_to_index(target_tache_id);
+
     switch(n) {
         case 1:
 
-
             printf("entrez la nouvelle description: ");
-            scanf(" %[^\n]", todo[target_tache-1].description);
+            scanf(" %[^\n]", todo[target_tache_index].description);
 
 
             system("cls");
@@ -296,24 +367,25 @@ void update_todo() {
 
         case 2:
             do {
-            printf("statut de tache %d: \n", target_tache);
-            printf("1. undone           2. doing           3. done\n-->");
+            printf("entre le Nouveau statut de tache %d: \n", target_tache_id);
+            printf("1. undone           2. doing           3. done\n--> ");
             scanf(" %d", &current_statu);
             } while (current_statu<1 && current_statu>3);
 
             if(current_statu == 1) {
-                strcpy(todo[target_tache-1].status, "undone");
-//                strcmp(todo[tache-1].status, "undone");
-                undone_counter++;
+
+                strcpy(todo[target_tache_index].status, "undone");
 
             } else if (current_statu == 2) {
-                strcpy(todo[target_tache-1].status, "doing");
-                undone_counter--;
+
+                strcpy(todo[target_tache_index].status, "doing");
 
             } else if (current_statu == 3) {
-                strcpy(todo[target_tache-1].status, "done");
-                done_counter++;
+
+                strcpy(todo[target_tache_index].status, "done");
                 undone_counter--;
+                done_counter++;
+
 
             }
 
@@ -333,11 +405,11 @@ void update_todo() {
         case 3:
             printf("entrez la nouvelle deadline: \n\n");
             printf("                            year: ");
-            scanf("%d", &todo[target_tache-1].dead_line.year);
+            scanf("%d", &todo[target_tache_index].dead_line.year);
             printf("                            month: ");
-            scanf("%d", &todo[target_tache-1].dead_line.month);
+            scanf("%d", &todo[target_tache_index].dead_line.month);
             printf("                            day: ");
-            scanf("%d", &todo[target_tache-1].dead_line.day);
+            scanf("%d", &todo[target_tache_index].dead_line.day);
 
             system("cls");
             system("COLOR 0A");
@@ -385,17 +457,6 @@ void search_todo() {
 
         }
 
-//        else {
-//                system("cls");
-//                system("COLOR 0C");
-//
-//                printf("\n  todo avec l'identifiant %d n'existe pas!\n\n", target_tache_id);
-//
-//                system("pause");
-//
-//                system("COLOR 0F");
-//        }
-
         menu();
 
     } else if (search_chois == 2) {
@@ -420,22 +481,6 @@ void search_todo() {
 
     }
 
-//    else {
-//
-//        system("cls");
-//        system("COLOR 0C");
-//
-//        printf("\n  todo avec le titre \"%s\" n'existe pas!\n\n", target_tache_id);
-//
-//        system("pause");
-//
-//        system("COLOR 0F");
-//
-//        menu();
-//
-//    }
-
-
 
 }
 
@@ -448,22 +493,28 @@ void delete_todo() {
     scanf("%d", &target_tache_id);
 
 
-    for(int i=0; i<tache_counter; i++) {
-        if(todo[i].id == target_tache_id) {
-            target_tache_index = i;
-        }
+    target_tache_index = id_to_index(target_tache_id);
+
+    if( strcmp(todo[target_tache_index].status, "undone") == 0 ) {
+        undone_counter--;
+    } else {
+        done_counter--;
     }
 
     for(int i=target_tache_index; i<tache_counter; i++) {
         todo[i] = todo[i+1];
     }
 
+
+    tache_counter--;
     delete_taches_counter++;
+
+
 
     system("cls");
     system("COLOR 0A");
 
-    printf("\n  tache %d deleted secsusfully!.\n\n", target_tache_id);
+    printf("\n  tache with the id %d deleted secsusfully!.\n\n", target_tache_id);
 
     system("pause");
 
@@ -498,12 +549,30 @@ void get_Statistics() {
 
         case 3:
             printf("\n  this statistic is coming soon...\n\n");
+            show_the_rest_days();
             break;
     }
 
     system("pause");
 
     menu();
+
+}
+
+void show_the_rest_days() {
+
+    calculate_rest_days();
+
+    printf("\n********************* LE NOMBRE DE JOURS RESTANTS JUSQU'AU DELAI DE CHAQUE TACHE ********************* \n");
+    for(int i=0; i<tache_counter; i++) {
+            printf("\n----------------- TACHE %d ----------------- \n", i+1);
+            printf("- id: %d.\n", todo[i].id);
+            printf("- le titre: %s.\n- le description: %s.\n", todo[i].title, todo[i].description);
+            printf("- les jours restants: %d", todo[i].the_rest_days);
+    }
+    printf("\n****************************************************************************************************** \n\n");
+
+
 
 }
 
